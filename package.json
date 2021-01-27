@@ -1,0 +1,30 @@
+{
+  "name": "validation-rule",
+  "version": "1.0.0",
+  "description": "A simple rule-validation API",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ekpono/validation-rule.git"
+  },
+  "keywords": [
+    "Validation",
+    "rule"
+  ],
+  "author": "Ekpono Ambrose",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ekpono/validation-rule/issues"
+  },
+  "homepage": "https://github.com/ekpono/validation-rule#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  }
+}
