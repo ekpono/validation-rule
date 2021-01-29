@@ -5,7 +5,19 @@ const {PORT} = require('./config');
 const routes = require('./routes/index');
 const app = express();
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '10mb' }));
+
+app.use((err, req, res, next) => {
+    if (err) {
+        res.status(400).send({
+            "message": "Invalid JSON payload passed.",
+            "status": "error",
+            "data": null
+        })
+    } else {
+        next()
+    }
+});
 
 app.use(routes);
 
