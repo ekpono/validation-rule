@@ -22,7 +22,7 @@ module.exports = {
             "data": {
                 "validation": {
                     "error": false,
-                    "field": fieldValue,
+                    "field": fieldName,
                     "field_value": fieldValue,
                     "condition": rule.condition,
                     "condition_value": rule.condition_value

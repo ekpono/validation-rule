@@ -21,7 +21,7 @@ module.exports = {
         }
 
         if(! requestBody.rule.hasOwnProperty('field') || ! requestBody.rule.hasOwnProperty('condition') || ! requestBody.rule.hasOwnProperty('condition_value')) {
-            return "keys field, condition, condition_value must be included in rule."
+            return "rule field should contain the following required keys field, condition and condition value."
         }
 
         if (typeof requestBody.rule.field !== "string" ) {

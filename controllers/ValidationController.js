@@ -16,8 +16,15 @@ module.exports = {
         if(rule.field.toString().indexOf(".") > -1) {
             let ruleField = rule.field;
             let ruleObj = ruleField.split(".");
-            let objectFieldExist = objectValidation.validate(rule, data, ruleField, ruleObj);
-            if (objectFieldExist) return res.status(HttpStatus.BAD_REQUEST).send({message:objectFieldExist, data: null})
+
+            //Make sure the object key exist if not throw an error
+            if(ruleObj.length > 2) {
+                return res.status(HttpStatus.BAD_REQUEST).send({message: "The nesting should not be more than two levels", status: "error", data: null})
+            }
+
+            //Ensure the data field exists in data
+            let nestedObjectFieldExist = objectValidation.validate(rule, data, ruleField, ruleObj);
+            if (nestedObjectFieldExist) return res.status(HttpStatus.BAD_REQUEST).send({message:nestedObjectFieldExist, status: "error",  data: null, })
 
             let value = data[ruleObj[0]][ruleObj[1]];
 
@@ -76,9 +83,9 @@ module.exports = {
             let ruleValidation = ruleMap[rule.condition](value, condition_value);
 
             if(ruleValidation) {
-                return res.status(HttpStatus.OK).send(httpResponse.successResponse(rule.field, condition_value, rule))
+                return res.status(HttpStatus.OK).send(httpResponse.successResponse(rule.field, value, rule))
             }
-            return res.status(HttpStatus.BAD_REQUEST).send(httpResponse.invalidationFailedResponse(rule.field, data, rule))
+            return res.status(HttpStatus.BAD_REQUEST).send(httpResponse.invalidationFailedResponse(rule.field, value, rule))
         }
     },
 };

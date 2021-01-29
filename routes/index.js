@@ -7,7 +7,7 @@ router.get('/', function (req, res) {
         "message": "My Rule-Validation API",
         "status": "success",
         "data": {
-            "name": "Ekpono Ambrose",
+            "name": "Ekpono Joseph Ambrose",
             "github": "@ekpono",
             "email": "ekponoambrose@gmail.com",
             "mobile": "08137787345",
