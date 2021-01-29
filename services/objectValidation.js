@@ -1,4 +1,3 @@
-const ruleMap = require('./../helpers/rules')
 
 module.exports = {
     validate(rule, data, ruleField, ruleObj) {

@@ -1,3 +1,5 @@
+let ruleConditions = require('./../helpers/rules')
+
 module.exports = {
     validateJson(requestBody) {
         if (! requestBody.hasOwnProperty('rule')) {
@@ -17,6 +19,7 @@ module.exports = {
         if (typeof requestBody.rule !== "object") {
             return "rule should be an object.";
         }
+
         if(! requestBody.rule.hasOwnProperty('field') || ! requestBody.rule.hasOwnProperty('condition') || ! requestBody.rule.hasOwnProperty('condition_value')) {
             return "keys field, condition, condition_value must be included in rule."
         }
@@ -33,5 +36,9 @@ module.exports = {
             return `${Object.keys(requestBody.rule)[2]} should be a string or a number.`;
         }
 
+        let acceptedConditions = Object.getOwnPropertyNames(ruleConditions);
+        if(! acceptedConditions.includes(requestBody.rule.condition)) {
+            return `Rule condition must either be [ ${acceptedConditions} ]`
+        }
     },
 };

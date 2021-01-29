@@ -1,5 +1,5 @@
 module.exports = {
-    badResponse(fieldName, fieldValue, rule) {
+    invalidationFailedResponse(fieldName, fieldValue, rule) {
         return {
             "message": `field ${fieldName} failed validation.`,
             "status": "error",

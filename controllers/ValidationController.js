@@ -11,7 +11,8 @@ module.exports = {
         let jsonObject = validate.validateJson(requestBody);
         if(jsonObject) {return res.status(HttpStatus.BAD_REQUEST).send({message: jsonObject, status: "error", data: null})}
 
-        //Check if rule is an object
+        //NESTED OBJECT
+        //Check if rule has a dot thus taking it an object
         if(rule.field.toString().indexOf(".") > -1) {
             let ruleField = rule.field;
             let ruleObj = ruleField.split(".");
@@ -20,41 +21,51 @@ module.exports = {
 
             let value = data[ruleObj[0]][ruleObj[1]];
 
-            let ruleValidation = ruleMap[rule.condition](value, rule.condition_value);
+            let ruleValidated = ruleMap[rule.condition](value, rule.condition_value);
 
-            if (ruleValidation) {
+            if (ruleValidated) {
                 res.status(HttpStatus.OK).send(httpResponse.successResponse(rule.field, rule.condition_value, rule));
             }
             //That means the object failed validation
-            return res.status(HttpStatus.BAD_REQUEST).send(httpResponse.badResponse(rule.field, rule.condition_value, rule));
+            return res.status(HttpStatus.BAD_REQUEST).send(httpResponse.invalidationFailedResponse(rule.field, rule.condition_value, rule));
         }
 
-        //Check if rule field is an array
+        // ARRAY VIA INDEX
+        //Check if rule field has a number. Number is seen as an array index
         let isNumberGiven = rule.field.replace(/[^0-9]/g,'');
-        if (isNumberGiven !== null) {
-            let value = data[isNumberGiven];
-            if (value === undefined) {
-                return res.status(400).send({
-                    "message": `field ${isNumberGiven} is missing from data.`,
-                    "status": "error",
-                    "data": null
-                })
+        if (isNumberGiven) {
+
+            //Check if data is string
+            if(typeof data === "string") {
+                let stringDataToArray = data.split('');
+                let value = stringDataToArray[isNumberGiven];
+                let condition_value = rule.condition_value;
+                let ruleValidated = ruleMap[rule.condition](value, condition_value);
+                if(ruleValidated) {
+                    return res.status(HttpStatus.OK).send(httpResponse.successResponse(rule.field, value, rule))
+                }
+                return res.status(HttpStatus.BAD_REQUEST).send(httpResponse.invalidationFailedResponse(rule.field, value, rule ))
             }
 
-            let condition_value = rule.condition_value;
-            let ruleValidation = ruleMap[rule.condition](value, condition_value);
-            if(ruleValidation) {
-                return res.status(HttpStatus.OK).send(httpResponse.successResponse(rule.field, condition_value, rule))
+            if (typeof data === "object") {
+                // Check if data is an array
+                let value = data[isNumberGiven];
+                let condition_value = rule.condition_value;
+                let ruleValidation = ruleMap[rule.condition](value, condition_value);
+                if(ruleValidation) {
+                    return res.status(HttpStatus.OK).send(httpResponse.successResponse(rule.field, condition_value, rule))
+                }
+                return res.status(HttpStatus.BAD_REQUEST).send(httpResponse.invalidationFailedResponse(rule.field, data, rule ))
             }
-            return res.status(HttpStatus.BAD_REQUEST).send(httpResponse.badResponse(rule.field, data, rule ))
         }
 
+        // NATIVE OBJECT
         let value = data[rule.field];
         let condition_value = rule.condition_value;
 
         let keyExist = rule.field in data;
         if (!keyExist) {
-            res.status(400).send({
+            return res.status(400).send({
                 "message": `${rule.field} is required.`,
                 "status": "error",
                 "data": null
@@ -65,33 +76,9 @@ module.exports = {
             let ruleValidation = ruleMap[rule.condition](value, condition_value);
 
             if(ruleValidation) {
-                return res.status(200).send({
-                    "message": `field ${rule.field} successfully validated.`,
-                    "status": "success",
-                    "data": {
-                        "validation": {
-                            "error": false,
-                            "field": rule.field,
-                            "field_value": condition_value,
-                            "condition": rule.condition,
-                            "condition_value": rule.condition_value
-                        }
-                    }
-                })
+                return res.status(HttpStatus.OK).send(httpResponse.successResponse(rule.field, condition_value, rule))
             }
-            return res.status(400).send({
-                "message": `field ${rule.field} failed validation.`,
-                "status": "error",
-                "data": {
-                    "validation": {
-                        "error": true,
-                        "field": rule.field,
-                        "field_value": condition_value,
-                        "condition": rule.condition,
-                        "condition_value": rule.condition_value
-                    }
-                }
-            })
+            return res.status(HttpStatus.BAD_REQUEST).send(httpResponse.invalidationFailedResponse(rule.field, data, rule))
         }
     },
 };
