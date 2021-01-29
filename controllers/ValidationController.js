@@ -13,12 +13,14 @@ module.exports = {
 
         //NESTED OBJECT
         //Check if rule has a dot thus taking it an object
+
         if(rule.field.toString().indexOf(".") > -1) {
             let ruleField = rule.field;
             let ruleObj = ruleField.split(".");
 
             //Make sure the object key exist if not throw an error
-            if(ruleObj.length > 2) {
+            let secondLevelObject = data[ruleObj[0]];
+            if(ruleObj.length > 2 && typeof secondLevelObject[ruleObj[1]] === "object") {
                 return res.status(HttpStatus.BAD_REQUEST).send({message: "The nesting should not be more than two levels", status: "error", data: null})
             }
 
@@ -31,7 +33,7 @@ module.exports = {
             let ruleValidated = ruleMap[rule.condition](value, rule.condition_value);
 
             if (ruleValidated) {
-                res.status(HttpStatus.OK).send(httpResponse.successResponse(rule.field, rule.condition_value, rule));
+                return res.status(HttpStatus.OK).send(httpResponse.successResponse(rule.field, rule.condition_value, rule));
             }
             //That means the object failed validation
             return res.status(HttpStatus.BAD_REQUEST).send(httpResponse.invalidationFailedResponse(rule.field, rule.condition_value, rule));
@@ -41,8 +43,7 @@ module.exports = {
         //Check if rule field has a number. Number is seen as an array index
         let isNumberGiven = rule.field.replace(/[^0-9]/g,'');
         if (isNumberGiven) {
-
-            //Check if data is string
+            //Check if data is a string
             if(typeof data === "string") {
                 let stringDataToArray = data.split('');
                 let value = stringDataToArray[isNumberGiven];
@@ -54,15 +55,19 @@ module.exports = {
                 return res.status(HttpStatus.BAD_REQUEST).send(httpResponse.invalidationFailedResponse(rule.field, value, rule ))
             }
 
+            // Check if data is an object or array
             if (typeof data === "object") {
-                // Check if data is an array
                 let value = data[isNumberGiven];
+
+                if (value === undefined) {
+                    return res.status(HttpStatus.BAD_REQUEST).send({message: `field ${isNumberGiven} is missing from data`, status: "error", data: null})
+                }
                 let condition_value = rule.condition_value;
                 let ruleValidation = ruleMap[rule.condition](value, condition_value);
                 if(ruleValidation) {
                     return res.status(HttpStatus.OK).send(httpResponse.successResponse(rule.field, condition_value, rule))
                 }
-                return res.status(HttpStatus.BAD_REQUEST).send(httpResponse.invalidationFailedResponse(rule.field, data, rule ))
+                return res.status(HttpStatus.BAD_REQUEST).send(httpResponse.invalidationFailedResponse(rule.field, rule.condition_value, rule ))
             }
         }
 
@@ -72,8 +77,8 @@ module.exports = {
 
         let keyExist = rule.field in data;
         if (!keyExist) {
-            return res.status(400).send({
-                "message": `${rule.field} is required.`,
+            return res.status(HttpStatus.BAD_REQUEST).send({
+                "message": `${rule.field} is missing from data.`,
                 "status": "error",
                 "data": null
             })
