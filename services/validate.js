@@ -13,7 +13,7 @@ module.exports = {
         }
 
         if(typeof requestBody.data !== "object" &&  typeof requestBody.data !== "string") {
-            return  "data should be an object or string."
+            return  "data field should be an object or string."
         }
 
         if (typeof requestBody.rule !== "object") {
@@ -21,7 +21,7 @@ module.exports = {
         }
 
         if(! requestBody.rule.hasOwnProperty('field') || ! requestBody.rule.hasOwnProperty('condition') || ! requestBody.rule.hasOwnProperty('condition_value')) {
-            return "rule field should contain the following required keys field, condition and condition value."
+            return "rule field should contain the following required keys field, condition and condition_value."
         }
 
         if (typeof requestBody.rule.field !== "string" ) {

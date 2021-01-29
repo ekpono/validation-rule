@@ -78,7 +78,7 @@ module.exports = {
         let keyExist = rule.field in data;
         if (!keyExist) {
             return res.status(HttpStatus.BAD_REQUEST).send({
-                "message": `${rule.field} is missing from data.`,
+                "message": `field ${rule.field} is missing from the data.`,
                 "status": "error",
                 "data": null
             })
